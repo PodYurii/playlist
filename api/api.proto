@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option go_package = "pkg/api";
+
+package api;
+
+service Playlist {
+  rpc SignIn(AuthRequest) returns (ResponseWithCode) {}
+  rpc SignUp(AuthRequest) returns (ResponseWithCode) {}
+  rpc DownloadTrack(TrackRequest) returns (stream TrackResponse) {}
+  rpc ListOfTracks(ListRequest) returns (stream ListResponse) {}
+  rpc AddSong(PosRequest) returns (ResponseWithCode) {}
+  rpc DeleteSong(PosRequest) returns (ResponseWithCode) {}
+  rpc Next(Empty) returns (ResponseWithCode) {}
+  rpc Prev(Empty) returns (ResponseWithCode) {}
+}
+
+message AuthRequest {
+  string Login = 1;
+  string Password = 2;
+}
+
+message  TrackRequest {
+  int64 TrackPos = 1;
+}
+
+message  TrackResponse {
+  bytes Chank = 1;
+}
+
+message  ListRequest {
+  bool OwnOrCommon = 1;
+}
+
+message  ListResponse {
+  string Name = 1;
+  int64 Position = 2;
+  uint64 Duration = 3;
+}
+
+message  PosRequest {
+  int64 TrackPos = 1;
+}
+
+message  ResponseWithCode {
+  uint32 ReturnCode = 1;
+}
+
+message  Empty {
+}
