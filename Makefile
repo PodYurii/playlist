@@ -5,7 +5,7 @@ build:
 	go build client.go
 
 proto_gen:
-	protoc --go_out=. --go_opt=paths=source_relative     --go-grpc_out=. --go-grpc_opt=paths=source_relative -I/home/yurii/playlist/playlist_git/api api.proto
+	protoc --go_out=api/ --go_opt=paths=source_relative     --go-grpc_out=api/ --go-grpc_opt=paths=source_relative -I/home/yurii/playlist/module_git/api api.proto
 
 cert_gen:
 	openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \

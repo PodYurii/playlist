@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/PodYurii/playlist_module/api"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"log"
-	"playlist/api"
 )
 
 func main() {
@@ -18,11 +18,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
-	defer conn.Close()
+	defer func(conn *grpc.ClientConn) {
+		err = conn.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(conn)
 	c := api.NewPlaylistClient(conn)
-	response, err := c.SignIn(context.Background(), &api.AuthRequest{Login: "foo", Password: "br"})
+	response, err := c.SignIn(context.Background(), &api.AuthRequest{Login: "foo", Password: "bar"})
 	if err != nil {
 		log.Fatalf("error when calling SignIn: %s", err)
 	}
-	log.Printf("Response from server: %d", response.ReturnCode)
+	log.Printf("Response from server: %d", response.SessionToken)
 }
