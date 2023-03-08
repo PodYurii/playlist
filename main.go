@@ -258,7 +258,3 @@ func main() {
 		log.Fatalf("failed to serve: %s", errserve)
 	}
 }
-
-// Docs, comments, style
-// unit-tests
-// Docker
