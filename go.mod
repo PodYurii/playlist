@@ -3,7 +3,7 @@ module playlist
 go 1.19
 
 require (
-	github.com/PodYurii/playlist_module v0.0.0-20230308095343-194861dbdc5e
+	github.com/PodYurii/playlist_module v0.0.0-20230308152120-237083dd87c3
 	go.mongodb.org/mongo-driver v1.11.2
 	google.golang.org/grpc v1.53.0
 )
@@ -11,6 +11,8 @@ require (
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
+	github.com/hajimehoshi/oto/v2 v2.3.1 // indirect
 	github.com/ivahaev/timer v0.0.0-20220304073306-2c469eaf1e44 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect

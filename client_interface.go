@@ -20,6 +20,14 @@ type CommonFuncParams struct {
 	c     *api.PlaylistClient
 }
 
+func ClearingStdin(CFP *CommonFuncParams) {
+	_, err := CFP.in.ReadString('\n')
+	if err != nil {
+		log.Println(err)
+		os.Exit(2)
+	}
+}
+
 func LoginWindow(CFP *CommonFuncParams) {
 	var a int
 	fl := true
@@ -28,6 +36,7 @@ func LoginWindow(CFP *CommonFuncParams) {
 		_, err := fmt.Fscan(CFP.in, &a)
 		if err != nil {
 			log.Println(err)
+			ClearingStdin(CFP)
 		}
 		if a == 1 {
 			SignInClicked(CFP, &fl)
@@ -95,7 +104,7 @@ func SignUpClicked(CFP *CommonFuncParams) {
 	}
 }
 
-func MainWindow(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) {
+func MainWindow(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
 	var a int
 	DrawInterface(pl)
 	for true {
@@ -103,42 +112,40 @@ func MainWindow(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer
 		_, err := fmt.Fscan(CFP.in, &a)
 		if err != nil {
 			log.Println(err)
+			ClearingStdin(CFP)
 		}
 		if a == 1 {
-			PrevClicked(CFP, pl, buf)
+			PrevClicked(CFP, pl)
 		} else if a == 2 {
-			PlayClicked(CFP, pl, buf)
+			PlayClicked(CFP, pl)
 		} else if a == 3 {
 			pl.Pause()
 		} else if a == 4 {
-			NextClicked(CFP, pl, buf)
+			NextClicked(CFP, pl)
 		} else if a == 5 {
 			AddClicked(CFP, pl)
 		} else if a == 6 {
-			DeleteClicked(CFP, pl, buf)
+			DeleteClicked(CFP, pl)
 		} else if a == -1 {
 			os.Exit(0)
 		}
 	}
 }
 
-func PlayClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) {
+func PlayClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
 	if pl.Current == nil {
 		fmt.Println("There is nothing to play!")
 		return
 	}
-	if buf == nil {
-		if !DownloadCall(CFP, pl, buf) {
+	if pl.DataCheck() {
+		if !DownloadCall(CFP, pl) {
 			return
 		}
 	}
-	if !pl.Play() {
-		fmt.Println("There is nothing to play!")
-	}
+	pl.Play()
 }
 
-func DownloadCall(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) bool {
-	buf = NewBuffer()
+func DownloadCall(CFP *CommonFuncParams, pl *playlist_module.Playlist) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	stream, err := (*CFP.c).DownloadTrack(ctx, &api.TokenAndId{TrackId: pl.Current.Value.(playlist_module.Track).Id, SessionToken: *CFP.token})
@@ -147,7 +154,7 @@ func DownloadCall(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buff
 		LoginWindow(CFP)
 	} else if err != nil {
 		log.Printf("Error when calling DownloadTrack: %s", err)
-		buf = nil
+		pl.ClearData()
 		return false
 	}
 	for {
@@ -157,16 +164,17 @@ func DownloadCall(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buff
 		}
 		if err1 != nil {
 			log.Printf("client.DownloadTrack failed: %v", err1)
-			buf = nil
+			pl.ClearData()
 			return false
 		}
 		if Response.GetChunk() == nil {
 			log.Printf("Empty chunk!")
-			buf = nil
+			pl.ClearData()
 			return false
 		}
-		buf.AddChunk(Response.Chunk)
+		pl.AddChunk(Response.Chunk)
 	}
+	pl.UnlockData()
 	return true
 }
 
@@ -206,7 +214,7 @@ func AddClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
 func DrawAddSong(CFP *CommonFuncParams, pl *playlist_module.Playlist, sl *[]playlist_module.Track) {
 	fmt.Println("---------AddSong-----------")
 	for ind, el := range *sl {
-		fmt.Println("(", ind, ")", el.Duration, el.Name) // format!!!
+		fmt.Println("(", ind, ")", el.Duration, el.Name)
 	}
 	fmt.Println("---------------------------")
 	a := -2
@@ -215,6 +223,7 @@ func DrawAddSong(CFP *CommonFuncParams, pl *playlist_module.Playlist, sl *[]play
 		_, err := fmt.Fscan(CFP.in, &a)
 		if err != nil {
 			log.Println(err)
+			ClearingStdin(CFP)
 		}
 	}
 	if a == -1 {
@@ -243,48 +252,54 @@ func DrawInterface(pl *playlist_module.Playlist) {
 	fmt.Println("---------------------------")
 }
 
-func PrevClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) {
-	if pl.Prev() {
-		buf = nil
-		if !DownloadCall(CFP, pl, buf) {
+func PrevClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
+	ch := make(chan bool)
+	go func() {
+		<-ch
+		if !DownloadCall(CFP, pl) {
 			return
 		}
+	}()
+	if pl.Prev(ch) {
 		DrawInterface(pl)
 		return
 	}
 	fmt.Println("Cant switch to prev track!")
 }
 
-func NextClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) {
-	if pl.Next() {
-		buf = nil
-		if !DownloadCall(CFP, pl, buf) {
+func NextClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
+	ch := make(chan bool)
+	go func() {
+		<-ch
+		if !DownloadCall(CFP, pl) {
 			return
 		}
+	}()
+	if pl.Next(ch) {
 		DrawInterface(pl)
 		return
 	}
 	fmt.Println("Cant switch to next track!")
 }
 
-func DeleteClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist, buf *Buffer) {
+func DeleteClicked(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
 	if pl.List.Len() == 0 {
 		fmt.Println("List if empty")
 		return
 	}
 	a := -2
 	for a < -1 || a >= pl.List.Len() {
-		fmt.Printf("Choose track from list( from 0 to %d) or return to menu(-1)", pl.List.Len()-1)
+		fmt.Printf("Choose track from list(from 0-lower to %d-higher) or return to menu(-1)\n", pl.List.Len()-1)
 		_, err := fmt.Fscan(CFP.in, &a)
 		if err != nil {
 			log.Println(err)
+			ClearingStdin(CFP)
 		}
 	}
 	if a == -1 {
 		return
 	}
 	if pl.DeleteSong(a) {
-		buf = nil
 		DrawInterface(pl)
 		return
 	}

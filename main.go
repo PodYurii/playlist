@@ -262,4 +262,3 @@ func main() {
 // Docs, comments, style
 // unit-tests
 // Docker
-// Go-Util tests for server

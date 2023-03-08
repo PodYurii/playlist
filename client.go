@@ -11,20 +11,6 @@ import (
 	"os"
 )
 
-type Buffer struct {
-	data []byte
-}
-
-func NewBuffer() *Buffer {
-	obj := Buffer{}
-	obj.data = make([]byte, 0)
-	return &obj
-}
-
-func (obj *Buffer) AddChunk(chunk []byte) {
-	obj.data = append(obj.data, chunk...)
-}
-
 func main() {
 	config := &tls.Config{
 		InsecureSkipVerify: true,
@@ -44,8 +30,10 @@ func main() {
 	var token uint64
 	CFP := CommonFuncParams{in, &token, &c}
 	LoginWindow(&CFP)
-	var buf *Buffer
 	pl := playlist_module.NewPlaylist()
 	defer pl.Destructor()
-	MainWindow(&CFP, pl, buf)
+	if err != nil {
+		panic("oto.NewContext failed: " + err.Error())
+	}
+	MainWindow(&CFP, pl)
 }
