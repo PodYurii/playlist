@@ -1,13 +1,20 @@
-all: build
+all: dir cert_gen build
+.PHONY: clean_bin clean_cert
 
 build:
-	go build main.go
-	go build client.go
+	go build -o server main.go
+	go build -o client client.go client_interface.go
 
-proto_gen:
-	protoc --go_out=api/ --go_opt=paths=source_relative     --go-grpc_out=api/ --go-grpc_opt=paths=source_relative -I/home/yurii/playlist/module_git/api api.proto
+dir:
+	mkdir cert
 
 cert_gen:
-	openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+	openssl req -x509 -newkey rsa:4096 -sha256 -days 7 -nodes \
       -keyout cert/server.key -out cert/server.crt -subj "/CN=localhost" \
       -addext "subjectAltName=DNS:localhost,DNS:localhost,IP:127.0.0.1"
+
+clean_bin:
+	rm -rf server client
+
+clean_cert:
+	rm -rf cert/server.crt cert/server.key

@@ -1,20 +1,35 @@
 package main
 
 import (
+	"bufio"
+	"crypto/tls"
+	"github.com/PodYurii/playlist_module"
 	"github.com/PodYurii/playlist_module/api"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"log"
+	"os"
 )
 
+type Buffer struct {
+	data []byte
+}
+
+func NewBuffer() *Buffer {
+	obj := Buffer{}
+	obj.data = make([]byte, 0)
+	return &obj
+}
+
+func (obj *Buffer) AddChunk(chunk []byte) {
+	obj.data = append(obj.data, chunk...)
+}
+
 func main() {
-	var conn *grpc.ClientConn // Create the client TLS credentials
-	creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	} // Initiate a connection with the server
-	conn, err = grpc.Dial("localhost:7777", grpc.WithTransportCredentials(creds))
+	config := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	conn, err := grpc.Dial("localhost:7777", grpc.WithTransportCredentials(credentials.NewTLS(config)))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -25,9 +40,12 @@ func main() {
 		}
 	}(conn)
 	c := api.NewPlaylistClient(conn)
-	response, err := c.SignIn(context.Background(), &api.AuthRequest{Login: "foo", Password: "bar"})
-	if err != nil {
-		log.Fatalf("error when calling SignIn: %s", err)
-	}
-	log.Printf("Response from server: %d", response.SessionToken)
+	in := bufio.NewReader(os.Stdin)
+	var token uint64
+	CFP := CommonFuncParams{in, &token, &c}
+	LoginWindow(&CFP)
+	var buf *Buffer
+	pl := playlist_module.NewPlaylist()
+	defer pl.Destructor()
+	MainWindow(&CFP, pl, buf)
 }
