@@ -12,10 +12,14 @@ import (
 )
 
 func main() {
+	target := "localhost:7777"
+	if len(os.Args) != 1 && os.Args[1] != "" {
+		target = os.Args[1]
+	}
 	config := &tls.Config{
 		InsecureSkipVerify: true,
 	}
-	conn, err := grpc.Dial("localhost:7777", grpc.WithTransportCredentials(credentials.NewTLS(config)))
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(credentials.NewTLS(config)))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}

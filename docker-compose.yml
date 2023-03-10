@@ -1,0 +1,24 @@
+services:
+  client:
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+    networks:
+      - net1
+  server:
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile_server
+    networks:
+      - net1
+      - net2
+  db:
+    image: mongo:latest
+    networks:
+      - net2
+
+networks:
+  net1:
+  net2:

@@ -1,0 +1,18 @@
+FROM ubuntu:latest
+HEALTHCHECK --interval=5m --timeout=3s \
+CMD curl -f http://localhost/ || exit 1
+USER root
+RUN useradd -ms /bin/bash ubuntu
+RUN apt-get -y update && apt-get -y upgrade
+RUN apt search -y golang-go && apt search -y gccgo-go
+RUN apt-get install -y golang-go && apt-get -y install libssl-dev && apt-get -y install make
+ARG cert_location=/usr/local/share/ca-certificates
+RUN apt-get install -y ca-certificates && apt-get install -y libasound2-dev
+RUN openssl s_client -showcerts -connect github.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM > ${cert_location}/github.crt
+RUN openssl s_client -showcerts -connect proxy.golang.org:443 </dev/null 2>/dev/null|openssl x509 -outform PEM >  ${cert_location}/proxy.golang.crt
+RUN update-ca-certificates
+COPY client_interface.go client.go Makefile go.mod go.sum ./
+RUN go mod download
+RUN make build_client
+USER ubuntu
+ENTRYPOINT bash

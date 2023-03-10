@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/PodYurii/playlist_module/api"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -232,7 +231,11 @@ func streamInterceptor(
 }
 
 func main() {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
+	uri := "mongodb://localhost:27017/"
+	if len(os.Args) != 1 && (os.Args[1] == "" || os.Args[1] == "_") {
+		uri = os.Args[1]
+	}
+	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -242,7 +245,11 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Database connected")
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", 7777))
+	target := "localhost:7777"
+	if len(os.Args) > 2 && os.Args[2] != "" {
+		target = os.Args[2]
+	}
+	lis, err := net.Listen("tcp", target)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
