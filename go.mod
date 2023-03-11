@@ -3,7 +3,7 @@ module playlist
 go 1.19
 
 require (
-	github.com/PodYurii/playlist_module v0.0.0-20230308152120-237083dd87c3
+	github.com/PodYurii/playlist_module v0.0.0-20230311163421-060e4dd596e7
 	go.mongodb.org/mongo-driver v1.11.2
 	google.golang.org/grpc v1.53.0
 )

@@ -35,9 +35,9 @@
 _$ make_
 #### Шаг 3
 Заполнить базу данных музыкальными композициями(коллекции Tracks и Files) \
-_db.tracks.insertOne({name:"track1",duration:5253725789,id:1});_ \
-_db.tracks.insertOne({name:"track2",duration:15253725789,id:2});_ \
-_db.tracks.insertOne({name:"track3",duration:26253725789,id:3});_ \
+_db.Tracks.insertOne({name:"track1",duration:5253725789,id:1})_ \
+_db.Tracks.insertOne({name:"track2",duration:15253725789,id:2})_ \
+_db.Tracks.insertOne({name:"track3",duration:26253725789,id:3})_ \
 _db.Files.insertOne({id:1, path:'{YOUR_PATH}/mp3_1.mp3'})_ \
 _db.Files.insertOne({id:2, path:'{YOUR_PATH}/mp3_1.mp3'})_ \
 _db.Files.insertOne({id:3, path:'{YOUR_PATH}/mp3_1.mp3'})_ \

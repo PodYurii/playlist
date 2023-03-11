@@ -106,6 +106,16 @@ func SignUpClicked(CFP *CommonFuncParams) {
 
 func MainWindow(CFP *CommonFuncParams, pl *playlist_module.Playlist) {
 	var a int
+	go func() {
+		for true {
+			fl := <-pl.Ch
+			if fl {
+				DownloadCall(CFP, pl)
+			} else {
+				return
+			}
+		}
+	}()
 	DrawInterface(pl)
 	for true {
 		fmt.Println("Prev(1) Play(2) Pause(3) Next(4) Add(5) Delete(6) Exit(-1)")

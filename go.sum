@@ -1,5 +1,5 @@
-github.com/PodYurii/playlist_module v0.0.0-20230308152120-237083dd87c3 h1:goQQGFDrk861E+It8d1jn/P92dhYCNggbq5wTOW6mQY=
-github.com/PodYurii/playlist_module v0.0.0-20230308152120-237083dd87c3/go.mod h1:48rjTcqZ0ZUIdSq7+LRauwckSoOwrmaKxdelFWueq4g=
+github.com/PodYurii/playlist_module v0.0.0-20230311163421-060e4dd596e7 h1:1xMgvtuUOvYUyyjbAnapkFj3RCy4agAo18kidCn+0E4=
+github.com/PodYurii/playlist_module v0.0.0-20230311163421-060e4dd596e7/go.mod h1:48rjTcqZ0ZUIdSq7+LRauwckSoOwrmaKxdelFWueq4g=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
